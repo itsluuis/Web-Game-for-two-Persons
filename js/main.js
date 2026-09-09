@@ -1,29 +1,43 @@
 /* ============================================
    MAIN MODULE
    App initialization, screen navigation,
-   settings management, event wiring.
+   settings management, loading screen,
+   role selection, pause, event wiring.
    ============================================ */
 
 (function App() {
     // --- Settings State ---
     const settings = {
         totalRounds: 5,
+        roundTime: 5,
+        customTimeSet: false,  // tracks if user manually changed time
         sfxEnabled: true,
         vfxEnabled: true
     };
 
-    // --- Screen Navigation ---
-    const screens = {
-        menu: document.getElementById('screen-menu'),
-        options: document.getElementById('screen-options'),
-        roles: document.getElementById('screen-roles'),
-        game: document.getElementById('screen-game'),
-        results: document.getElementById('screen-results')
+    // --- Role Selection State ---
+    const roleState = {
+        p1: 'center',  // 'center' | 'shooter' | 'dodger'
+        p2: 'center'
     };
+
+    // --- Screen Navigation ---
+    const screens = {};
+    let currentScreen = 'menu';
+
+    function cacheScreens() {
+        screens.menu = document.getElementById('screen-menu');
+        screens.options = document.getElementById('screen-options');
+        screens.loading = document.getElementById('screen-loading');
+        screens.roles = document.getElementById('screen-roles');
+        screens.game = document.getElementById('screen-game');
+        screens.results = document.getElementById('screen-results');
+    }
 
     function showScreen(screenName) {
         Object.values(screens).forEach(s => s.classList.remove('active'));
         screens[screenName].classList.add('active');
+        currentScreen = screenName;
     }
 
     // --- Particles Background ---
@@ -47,28 +61,29 @@
             container.appendChild(particle);
         }
 
-        // Add particle animation
         if (!document.getElementById('particle-styles')) {
             const style = document.createElement('style');
             style.id = 'particle-styles';
             style.textContent = `
                 @keyframes particleFloat {
                     0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-                    25% { transform: translate(${20}px, -${30}px) scale(1.2); opacity: 0.6; }
-                    50% { transform: translate(-${15}px, -${60}px) scale(0.8); opacity: 0.4; }
-                    75% { transform: translate(${25}px, -${20}px) scale(1.1); opacity: 0.5; }
+                    25% { transform: translate(20px, -30px) scale(1.2); opacity: 0.6; }
+                    50% { transform: translate(-15px, -60px) scale(0.8); opacity: 0.4; }
+                    75% { transform: translate(25px, -20px) scale(1.1); opacity: 0.5; }
                 }
             `;
             document.head.appendChild(style);
         }
     }
 
-    // --- Main Menu ---
+    // ==========================================
+    // MAIN MENU
+    // ==========================================
     function setupMainMenu() {
         document.getElementById('btn-play').addEventListener('click', () => {
-            AudioManager.init(); // Init audio on first user gesture
+            AudioManager.init();
             AudioManager.play('tick');
-            showScreen('roles');
+            startLoadingScreen();
         });
 
         document.getElementById('btn-options').addEventListener('click', () => {
@@ -78,16 +93,18 @@
         });
 
         document.getElementById('btn-exit').addEventListener('click', () => {
-            // Close the tab (only works if opened via JS)
             window.close();
-            // Fallback: show a message
-            alert('¡Gracias por jugar Splash Dodge! 💦\nPuedes cerrar esta pestaña.');
+            alert('¡Gracias por jugar Acuasplas! 💦\nPuedes cerrar esta pestaña.');
         });
     }
 
-    // --- Options Screen ---
+    // ==========================================
+    // OPTIONS SCREEN
+    // ==========================================
     function setupOptions() {
         const roundsValue = document.getElementById('rounds-value');
+        const timeValue = document.getElementById('time-value');
+        const timeHint = document.getElementById('time-hint');
         const sfxToggle = document.getElementById('sfx-toggle');
         const vfxToggle = document.getElementById('vfx-toggle');
 
@@ -105,6 +122,32 @@
             if (settings.totalRounds < 10) {
                 settings.totalRounds++;
                 roundsValue.textContent = settings.totalRounds;
+            }
+        });
+
+        // Round time stepper
+        document.getElementById('time-minus').addEventListener('click', () => {
+            AudioManager.play('tick');
+            if (settings.roundTime > 1) {
+                settings.roundTime--;
+                settings.customTimeSet = true;
+                timeValue.textContent = settings.roundTime;
+                timeHint.textContent = `Tiempo fijo: ${settings.roundTime}s en todas las rondas`;
+            }
+        });
+
+        document.getElementById('time-plus').addEventListener('click', () => {
+            AudioManager.play('tick');
+            if (settings.roundTime < 5) {
+                settings.roundTime++;
+                timeValue.textContent = settings.roundTime;
+                // If they set it back to 5 without having touched it, consider it default
+                if (settings.roundTime === 5 && !settings.customTimeSet) {
+                    timeHint.textContent = 'Por defecto: 5s → 3s en ronda 4+';
+                } else {
+                    settings.customTimeSet = true;
+                    timeHint.textContent = `Tiempo fijo: ${settings.roundTime}s en todas las rondas`;
+                }
             }
         });
 
@@ -133,57 +176,183 @@
         });
     }
 
-    // --- Role Selection Screen ---
-    function setupRoleSelection() {
-        const shooterCard = document.getElementById('role-shooter');
-        const dodgerCard = document.getElementById('role-dodger');
-        const infoText = document.getElementById('role-info-text');
+    // ==========================================
+    // LOADING SCREEN (fake loading)
+    // ==========================================
+    function startLoadingScreen() {
+        showScreen('loading');
+        const fill = document.getElementById('loading-bar-fill');
+        const text = document.getElementById('loading-text');
 
-        function selectRole(role) {
-            AudioManager.play('tick');
+        fill.style.width = '0%';
+        text.textContent = 'Preparando arena...';
 
-            // Visual selection
-            shooterCard.classList.toggle('selected', role === 'shooter');
-            dodgerCard.classList.toggle('selected', role === 'dodger');
+        const steps = [
+            { time: 400, width: '25%', label: 'Cargando controles...' },
+            { time: 900, width: '50%', label: 'Preparando torreta...' },
+            { time: 1400, width: '75%', label: 'Calibrando chorro...' },
+            { time: 2000, width: '100%', label: '¡Listo!' }
+        ];
 
-            const otherRole = role === 'shooter' ? 'Esquivador' : 'Torreta';
-            infoText.textContent = `Jugador 2 será: ${otherRole}`;
-
-            // Start game after a brief delay
+        steps.forEach(step => {
             setTimeout(() => {
-                Game.setRoles(role);
-                Game.setTotalRounds(settings.totalRounds);
-                showScreen('game');
+                fill.style.width = step.width;
+                text.textContent = step.label;
+            }, step.time);
+        });
 
-                // Start the game after screen transition
-                setTimeout(() => {
-                    Game.startGame();
-                }, 600);
-            }, 500);
+        // After loading, go to role selection
+        setTimeout(() => {
+            openRoleSelection();
+        }, 2600);
+    }
+
+    // ==========================================
+    // ROLE SELECTION SCREEN
+    // ==========================================
+    function openRoleSelection() {
+        // Reset role state
+        roleState.p1 = 'center';
+        roleState.p2 = 'center';
+
+        // Move tokens back to center
+        const p1Token = document.getElementById('p1-token');
+        const p2Token = document.getElementById('p2-token');
+        const centerSlot = document.getElementById('slot-center');
+        centerSlot.appendChild(p1Token);
+        centerSlot.appendChild(p2Token);
+
+        // Reset panel highlights
+        _updateRolePanelHighlights();
+
+        // Hide ready button
+        document.getElementById('btn-ready').classList.add('hidden');
+
+        // Switch to role select input mode
+        InputManager.setMode('roleSelect');
+        InputManager.setEnabled(true);
+
+        showScreen('roles');
+    }
+
+    function handleRoleSelect(player, direction) {
+        const otherPlayer = player === 'p1' ? 'p2' : 'p1';
+        const currentPos = roleState[player];
+        let targetPos;
+
+        if (direction === 'left') {
+            targetPos = currentPos === 'shooter' ? 'center' : 'shooter';
+        } else {
+            targetPos = currentPos === 'dodger' ? 'center' : 'dodger';
         }
 
-        shooterCard.addEventListener('click', () => selectRole('shooter'));
-        dodgerCard.addEventListener('click', () => selectRole('dodger'));
+        // Can't go where other player already is (except center)
+        if (targetPos !== 'center' && roleState[otherPlayer] === targetPos) {
+            return; // blocked
+        }
+
+        roleState[player] = targetPos;
+        AudioManager.play('tick');
+
+        // Move token DOM element
+        const token = document.getElementById(`${player === 'p1' ? 'p1' : 'p2'}-token`);
+        const slotId = targetPos === 'shooter' ? 'slot-shooter'
+                     : targetPos === 'dodger' ? 'slot-dodger'
+                     : 'slot-center';
+        const slot = document.getElementById(slotId);
+
+        // Re-add with animation
+        token.style.animation = 'none';
+        token.offsetHeight; // force reflow
+        token.style.animation = '';
+        slot.appendChild(token);
+
+        _updateRolePanelHighlights();
+        _checkRolesReady();
+    }
+
+    function _updateRolePanelHighlights() {
+        const panels = ['panel-shooter', 'panel-center', 'panel-dodger'];
+        panels.forEach(id => {
+            document.getElementById(id).classList.remove('has-player');
+        });
+
+        if (roleState.p1 === 'shooter' || roleState.p2 === 'shooter') {
+            document.getElementById('panel-shooter').classList.add('has-player');
+        }
+        if (roleState.p1 === 'dodger' || roleState.p2 === 'dodger') {
+            document.getElementById('panel-dodger').classList.add('has-player');
+        }
+    }
+
+    function _checkRolesReady() {
+        const readyBtn = document.getElementById('btn-ready');
+        const bothChosen = roleState.p1 !== 'center' && roleState.p2 !== 'center'
+                        && roleState.p1 !== roleState.p2;
+
+        if (bothChosen) {
+            readyBtn.classList.remove('hidden');
+        } else {
+            readyBtn.classList.add('hidden');
+        }
+    }
+
+    function setupRoleSelection() {
+        // Ready button → start game
+        document.getElementById('btn-ready').addEventListener('click', () => {
+            AudioManager.play('tick');
+            InputManager.setEnabled(false);
+            InputManager.setMode('game');
+
+            // Determine who is shooter based on role selection
+            // P1's role = roleState.p1 ('shooter' or 'dodger')
+            const p1Role = roleState.p1; // 'shooter' or 'dodger'
+            Game.setRoles(p1Role);
+            Game.setTotalRounds(settings.totalRounds);
+            Game.setCustomRoundTime(settings.customTimeSet ? settings.roundTime : null);
+
+            showScreen('game');
+
+            setTimeout(() => {
+                Game.startGame();
+            }, 600);
+        });
 
         // Back button
         document.getElementById('btn-roles-back').addEventListener('click', () => {
             AudioManager.play('tick');
-            shooterCard.classList.remove('selected');
-            dodgerCard.classList.remove('selected');
-            infoText.textContent = 'El Jugador 2 recibirá el rol opuesto.';
+            InputManager.setEnabled(false);
+            InputManager.setMode('game');
             showScreen('menu');
         });
     }
 
-    // --- Results Screen ---
+    // ==========================================
+    // PAUSE HANDLING
+    // ==========================================
+    function setupPause() {
+        InputManager.onEscape(() => {
+            // Only handle ESC during game screen
+            if (currentScreen !== 'game') return;
+
+            Game.togglePause();
+        });
+
+        // Exit to menu from pause
+        document.getElementById('btn-pause-exit').addEventListener('click', () => {
+            AudioManager.play('tick');
+            Game.stop();
+            showScreen('menu');
+        });
+    }
+
+    // ==========================================
+    // RESULTS SCREEN
+    // ==========================================
     function setupResults() {
         document.getElementById('btn-play-again').addEventListener('click', () => {
             AudioManager.play('tick');
-            showScreen('roles');
-            // Reset role selection visuals
-            document.getElementById('role-shooter').classList.remove('selected');
-            document.getElementById('role-dodger').classList.remove('selected');
-            document.getElementById('role-info-text').textContent = 'El Jugador 2 recibirá el rol opuesto.';
+            openRoleSelection();
         });
 
         document.getElementById('btn-back-menu').addEventListener('click', () => {
@@ -194,7 +363,6 @@
 
     // --- Game End Handler ---
     function handleGameEnd(result) {
-        // Play appropriate sound
         setTimeout(() => {
             if (result.winner === 'tie') {
                 AudioManager.play('tick');
@@ -202,7 +370,6 @@
                 AudioManager.play('win');
             }
 
-            // Update results screen
             const titleEl = document.getElementById('result-title');
             const winnerTextEl = document.getElementById('result-winner-text');
             const crownEl = document.getElementById('result-crown');
@@ -214,7 +381,6 @@
             shooterScoreEl.textContent = result.shooterScore;
             dodgerScoreEl.textContent = result.dodgerScore;
 
-            // Remove previous winner highlights
             shooterCard.classList.remove('winner');
             dodgerCard.classList.remove('winner');
 
@@ -238,15 +404,24 @@
         }, 500);
     }
 
-    // --- Initialization ---
+    // ==========================================
+    // INITIALIZATION
+    // ==========================================
     function start() {
+        cacheScreens();
+
         // Init modules
         Game.init();
         InputManager.init();
 
-        // Wire input → game
+        // Wire input → game (game mode)
         InputManager.onSelection((role, position) => {
             Game.setSelection(role, position);
+        });
+
+        // Wire input → role selection (roleSelect mode)
+        InputManager.onRoleSelect((player, direction) => {
+            handleRoleSelect(player, direction);
         });
 
         // Wire game end → results
@@ -257,6 +432,7 @@
         setupOptions();
         setupRoleSelection();
         setupResults();
+        setupPause();
 
         // Background effects
         initParticles();

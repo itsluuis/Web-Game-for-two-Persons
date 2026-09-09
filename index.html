@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Splash Dodge - Un juego local para 2 jugadores. ¡Esquiva el chorro o dispara con precisión!">
-    <title>Splash Dodge 💦</title>
+    <meta name="description" content="Acuasplas - Un juego local para 2 jugadores. ¡Esquiva el chorro o dispara con precisión!">
+    <title>Acuasplas 💦</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,23 +15,23 @@
     <!-- ===== SCREEN: MAIN MENU ===== -->
     <section id="screen-menu" class="screen active">
         <div class="particles" id="bg-particles"></div>
-        <div class="menu-container">
-            <div class="title-wrapper">
-                <span class="title-emoji">💦</span>
-                <h1 class="game-title">SPLASH<br><span class="title-accent">DODGE</span></h1>
-                <span class="title-emoji">💦</span>
+        <div class="menu-layout">
+            <div class="menu-left">
+                <div class="menu-buttons">
+                    <button class="btn btn-primary" id="btn-play">
+                        <span class="btn-icon">🎮</span> JUGAR
+                    </button>
+                    <button class="btn btn-secondary" id="btn-options">
+                        <span class="btn-icon">⚙️</span> OPCIONES
+                    </button>
+                    <button class="btn btn-ghost" id="btn-exit">
+                        <span class="btn-icon">🚪</span> SALIR
+                    </button>
+                </div>
             </div>
-            <p class="subtitle">Esquiva o dispara. 2 jugadores. 1 teclado.</p>
-            <div class="menu-buttons">
-                <button class="btn btn-primary" id="btn-play">
-                    <span class="btn-icon">🎮</span> JUGAR
-                </button>
-                <button class="btn btn-secondary" id="btn-options">
-                    <span class="btn-icon">⚙️</span> OPCIONES
-                </button>
-                <button class="btn btn-ghost" id="btn-exit">
-                    <span class="btn-icon">🚪</span> SALIR
-                </button>
+            <div class="menu-right">
+                <h1 class="game-title">ACUA<span class="title-accent">SPLAS</span></h1>
+                <p class="subtitle">💦 2 jugadores · 1 teclado 💦</p>
             </div>
         </div>
         <div class="footer-hint">Versión Alpha 1</div>
@@ -49,6 +49,19 @@
                         <button class="stepper-btn" id="rounds-minus">−</button>
                         <span class="stepper-value" id="rounds-value">5</span>
                         <button class="stepper-btn" id="rounds-plus">+</button>
+                    </div>
+                </div>
+
+                <div class="option-row">
+                    <div class="option-label-group">
+                        <label class="option-label">Tiempo por Ronda</label>
+                        <span class="option-hint" id="time-hint">Por defecto: 5s → 3s en ronda 4+</span>
+                    </div>
+                    <div class="stepper">
+                        <button class="stepper-btn" id="time-minus">−</button>
+                        <span class="stepper-value" id="time-value">5</span>
+                        <span class="stepper-unit">s</span>
+                        <button class="stepper-btn" id="time-plus">+</button>
                     </div>
                 </div>
 
@@ -75,35 +88,88 @@
         </div>
     </section>
 
-    <!-- ===== SCREEN: ROLE SELECTION ===== -->
-    <section id="screen-roles" class="screen">
-        <div class="menu-container">
-            <h2 class="screen-title">🎭 SELECCIÓN DE ROLES</h2>
-            <p class="screen-subtitle">Jugador 1, elige tu rol:</p>
+    <!-- ===== SCREEN: LOADING ===== -->
+    <section id="screen-loading" class="screen">
+        <div class="menu-container loading-container">
+            <h2 class="screen-title">PREPARANDO PARTIDA</h2>
 
-            <div class="role-cards">
-                <button class="role-card" id="role-shooter" data-role="shooter">
-                    <div class="role-icon-wrapper shooter-color">
-                        <span class="role-icon">🔫</span>
+            <div class="loading-players">
+                <div class="loading-player">
+                    <div class="loading-player-icon p1-glow">🧑</div>
+                    <span class="loading-player-name">JUGADOR 1</span>
+                    <div class="loading-keys">
+                        <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>
                     </div>
-                    <span class="role-name">TORRETA</span>
-                    <span class="role-desc">Dispara el chorro de agua</span>
-                    <span class="role-controls">Controles: A / S / D</span>
-                </button>
+                </div>
 
-                <span class="vs-divider">VS</span>
+                <span class="loading-vs">VS</span>
 
-                <button class="role-card" id="role-dodger" data-role="dodger">
-                    <div class="role-icon-wrapper dodger-color">
-                        <span class="role-icon">🏃</span>
+                <div class="loading-player">
+                    <div class="loading-player-icon p2-glow">🧑</div>
+                    <span class="loading-player-name">JUGADOR 2</span>
+                    <div class="loading-keys">
+                        <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd>
                     </div>
-                    <span class="role-name">ESQUIVADOR</span>
-                    <span class="role-desc">Evita el chorro de agua</span>
-                    <span class="role-controls">Controles: ← / ↓ / →</span>
-                </button>
+                </div>
             </div>
 
-            <p class="role-info" id="role-info-text">El Jugador 2 recibirá el rol opuesto.</p>
+            <div class="loading-bar-container">
+                <div class="loading-bar">
+                    <div class="loading-bar-fill" id="loading-bar-fill"></div>
+                </div>
+                <span class="loading-text" id="loading-text">Cargando...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SCREEN: ROLE SELECTION ===== -->
+    <section id="screen-roles" class="screen">
+        <div class="menu-container role-select-container">
+            <h2 class="screen-title">🎭 SELECCIÓN DE ROLES</h2>
+            <p class="screen-subtitle">Usa tus controles para moverte al rol que quieras</p>
+
+            <div class="role-arena">
+                <!-- Left panel: Torreta -->
+                <div class="role-panel" id="panel-shooter">
+                    <div class="role-panel-header">
+                        <span class="role-panel-icon">🔫</span>
+                        <span class="role-panel-name">TORRETA</span>
+                    </div>
+                    <div class="role-panel-players" id="slot-shooter"></div>
+                </div>
+
+                <!-- Center panel: Players start here -->
+                <div class="role-panel role-panel-center" id="panel-center">
+                    <div class="role-panel-players" id="slot-center">
+                        <div class="player-token" id="p1-token">
+                            <div class="player-token-icon p1-glow">🧑</div>
+                            <span class="player-token-label">J1</span>
+                        </div>
+                        <div class="player-token" id="p2-token">
+                            <div class="player-token-icon p2-glow">🧑</div>
+                            <span class="player-token-label">J2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right panel: Esquivador -->
+                <div class="role-panel" id="panel-dodger">
+                    <div class="role-panel-header">
+                        <span class="role-panel-icon">🏃</span>
+                        <span class="role-panel-name">ESQUIVADOR</span>
+                    </div>
+                    <div class="role-panel-players" id="slot-dodger"></div>
+                </div>
+            </div>
+
+            <div class="role-controls-hint">
+                <span class="p1-hint">J1: <kbd>A</kbd> ← → <kbd>D</kbd></span>
+                <span class="p2-hint">J2: <kbd>←</kbd> ← → <kbd>→</kbd></span>
+            </div>
+
+            <button class="btn btn-primary btn-ready hidden" id="btn-ready">
+                <span class="btn-icon">✅</span> ¡LISTO!
+            </button>
 
             <button class="btn btn-ghost" id="btn-roles-back">
                 <span class="btn-icon">←</span> VOLVER
@@ -199,6 +265,18 @@
             <div id="round-result" class="round-result hidden">
                 <span class="result-icon" id="result-icon">💥</span>
                 <span class="result-text" id="result-text">¡IMPACTO!</span>
+            </div>
+
+            <!-- Pause Overlay -->
+            <div id="pause-overlay" class="pause-overlay hidden">
+                <div class="pause-content">
+                    <span class="pause-icon">⏸️</span>
+                    <h2 class="pause-title">PAUSA</h2>
+                    <p class="pause-hint">Presiona <kbd>ESC</kbd> para continuar</p>
+                    <button class="btn btn-ghost" id="btn-pause-exit">
+                        <span class="btn-icon">🏠</span> SALIR AL MENÚ
+                    </button>
+                </div>
             </div>
         </div>
 

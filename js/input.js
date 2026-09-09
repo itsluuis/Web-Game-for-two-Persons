@@ -1,15 +1,20 @@
 /* ============================================
    INPUT MODULE
    Handles keyboard input for both players.
-   Shooter: A/S/D (left/center/right)
-   Dodger:  ←/↓/→ (left/center/right)
+   Supports game mode and role-select mode.
+   Shooter (P1): A/S/D (left/center/right)
+   Dodger  (P2): ←/↓/→ (left/center/right)
+   ESC: Pause toggle
    ============================================ */
 
 const InputManager = (() => {
     let enabled = false;
     let onSelectionCallback = null;
+    let onEscapeCallback = null;
+    let onRoleSelectCallback = null;
+    let mode = 'game'; // 'game' | 'roleSelect'
 
-    // Key mappings
+    // Key mappings for game mode
     const SHOOTER_KEYS = {
         'KeyA': 0,    // Left
         'KeyS': 1,    // Center
@@ -22,11 +27,30 @@ const InputManager = (() => {
         'ArrowRight': 2   // Right
     };
 
+    // Key mappings for role selection mode (left/right only)
+    const P1_ROLE_KEYS = {
+        'KeyA': 'left',
+        'KeyD': 'right'
+    };
+
+    const P2_ROLE_KEYS = {
+        'ArrowLeft': 'left',
+        'ArrowRight': 'right'
+    };
+
     /**
      * Initialize input listeners.
      */
     function init() {
         document.addEventListener('keydown', _handleKeyDown);
+    }
+
+    /**
+     * Set the input mode.
+     * @param {'game'|'roleSelect'} newMode
+     */
+    function setMode(newMode) {
+        mode = newMode;
     }
 
     /**
@@ -38,7 +62,7 @@ const InputManager = (() => {
     }
 
     /**
-     * Register a callback for when a player makes a selection.
+     * Register a callback for game selections.
      * @param {function(role: string, position: number)} callback
      */
     function onSelection(callback) {
@@ -46,34 +70,75 @@ const InputManager = (() => {
     }
 
     /**
+     * Register a callback for ESC key.
+     * @param {function()} callback
+     */
+    function onEscape(callback) {
+        onEscapeCallback = callback;
+    }
+
+    /**
+     * Register a callback for role selection input.
+     * @param {function(player: 'p1'|'p2', direction: 'left'|'right')} callback
+     */
+    function onRoleSelect(callback) {
+        onRoleSelectCallback = callback;
+    }
+
+    /**
      * Internal key handler.
      */
     function _handleKeyDown(event) {
-        if (!enabled) return;
-
         const code = event.code;
 
-        // Check shooter keys
-        if (code in SHOOTER_KEYS) {
+        // ESC always works (even when input is "disabled")
+        if (code === 'Escape') {
             event.preventDefault();
-            if (onSelectionCallback) {
-                onSelectionCallback('shooter', SHOOTER_KEYS[code]);
-            }
+            if (onEscapeCallback) onEscapeCallback();
             return;
         }
 
-        // Check dodger keys
-        if (code in DODGER_KEYS) {
-            event.preventDefault();
-            if (onSelectionCallback) {
-                onSelectionCallback('dodger', DODGER_KEYS[code]);
+        if (!enabled) return;
+
+        if (mode === 'game') {
+            // Game mode: A/S/D and arrows for position selection
+            if (code in SHOOTER_KEYS) {
+                event.preventDefault();
+                if (onSelectionCallback) {
+                    onSelectionCallback('shooter', SHOOTER_KEYS[code]);
+                }
+                return;
             }
-            return;
+
+            if (code in DODGER_KEYS) {
+                event.preventDefault();
+                if (onSelectionCallback) {
+                    onSelectionCallback('dodger', DODGER_KEYS[code]);
+                }
+                return;
+            }
+        } else if (mode === 'roleSelect') {
+            // Role select mode: A/D for P1, ←/→ for P2
+            if (code in P1_ROLE_KEYS) {
+                event.preventDefault();
+                if (onRoleSelectCallback) {
+                    onRoleSelectCallback('p1', P1_ROLE_KEYS[code]);
+                }
+                return;
+            }
+
+            if (code in P2_ROLE_KEYS) {
+                event.preventDefault();
+                if (onRoleSelectCallback) {
+                    onRoleSelectCallback('p2', P2_ROLE_KEYS[code]);
+                }
+                return;
+            }
         }
     }
 
     /**
-     * Clean up listeners (if needed).
+     * Clean up listeners.
      */
     function destroy() {
         document.removeEventListener('keydown', _handleKeyDown);
@@ -81,8 +146,11 @@ const InputManager = (() => {
 
     return {
         init,
+        setMode,
         setEnabled,
         onSelection,
+        onEscape,
+        onRoleSelect,
         destroy
     };
 })();

@@ -1,7 +1,7 @@
 /* ============================================
    GAME MODULE
    Core game logic: rounds, countdown, scoring,
-   state machine, reveal phase.
+   state machine, reveal phase, pause.
    ============================================ */
 
 const Game = (() => {
@@ -11,28 +11,33 @@ const Game = (() => {
         currentRound: 1,
         scores: { shooter: 0, dodger: 0 },
         countdown: 5,
-        phase: 'idle', // idle | ready | selecting | revealing | result | ended
+        countdownMax: 5,          // current round's max countdown
+        phase: 'idle',            // idle | ready | selecting | revealing | result | paused | ended
+        phaseBeforePause: null,   // saved phase when pausing
         selections: {
-            shooter: null, // 0=left, 1=center, 2=right
+            shooter: null,
             dodger: null
         },
         roles: {
-            player1: null, // 'shooter' | 'dodger'
+            player1: null,
             player2: null
         },
         settings: {
             sfxEnabled: true,
-            vfxEnabled: true
+            vfxEnabled: true,
+            customRoundTime: null  // null = use dynamic (5/3), number = use fixed
         }
     };
 
     let countdownTimer = null;
     let onGameEndCallback = null;
+    let revealTimeouts = [];       // track reveal phase timeouts for cleanup
 
     // --- DOM References (cached on init) ---
     let domRoundInfo, domCountdown, domScoreShooter, domScoreDodger;
     let domShooterStatus, domDodgerStatus;
     let domShooterIndicator, domDodgerIndicator;
+    let domPauseOverlay;
 
     /**
      * Initialize the game module. Caches DOM refs.
@@ -46,6 +51,7 @@ const Game = (() => {
         domDodgerStatus = document.getElementById('dodger-status');
         domShooterIndicator = document.querySelector('.shooter-indicator');
         domDodgerIndicator = document.querySelector('.dodger-indicator');
+        domPauseOverlay = document.getElementById('pause-overlay');
     }
 
     /**
@@ -54,6 +60,14 @@ const Game = (() => {
      */
     function setTotalRounds(rounds) {
         state.totalRounds = Math.max(1, Math.min(10, rounds));
+    }
+
+    /**
+     * Set custom round time. null = use default dynamic behavior.
+     * @param {number|null} seconds
+     */
+    function setCustomRoundTime(seconds) {
+        state.settings.customRoundTime = seconds;
     }
 
     /**
@@ -94,21 +108,38 @@ const Game = (() => {
     }
 
     /**
+     * Get the countdown duration for the current round.
+     */
+    function _getCountdownDuration() {
+        // If user set a custom time, always use that
+        if (state.settings.customRoundTime !== null) {
+            return state.settings.customRoundTime;
+        }
+        // Default dynamic: 5s for rounds 1-3, 3s for round 4+
+        return state.currentRound <= 3 ? 5 : 3;
+    }
+
+    /**
      * Start a round: reset selections, begin countdown.
      */
     function startRound() {
         state.phase = 'selecting';
         state.selections = { shooter: null, dodger: null };
 
-        // Determine countdown duration: 5s for rounds 1-3, 3s for round 4+
-        state.countdown = state.currentRound <= 3 ? 5 : 3;
+        // Determine countdown duration
+        state.countdownMax = _getCountdownDuration();
+        state.countdown = state.countdownMax;
+
+        const isUrgent = state.settings.customRoundTime !== null
+            ? state.settings.customRoundTime <= 3
+            : state.currentRound > 3;
 
         // Reset visuals
         Animations.hideRoundResult();
         Animations.clearWaterJets();
         Animations.resetEntity('turret');
         Animations.resetEntity('dodger');
-        Animations.setCountdownUrgent(state.currentRound > 3);
+        Animations.setCountdownUrgent(isUrgent);
 
         // Reset indicators
         domShooterStatus.textContent = 'Esperando...';
@@ -160,6 +191,75 @@ const Game = (() => {
     }
 
     /**
+     * Toggle pause state.
+     */
+    function togglePause() {
+        if (state.phase === 'paused') {
+            _resume();
+        } else if (state.phase === 'selecting') {
+            _pause();
+        }
+        // Don't allow pause during revealing/result phases
+    }
+
+    /**
+     * Pause the game.
+     */
+    function _pause() {
+        state.phaseBeforePause = state.phase;
+        state.phase = 'paused';
+        InputManager.setEnabled(false);
+
+        // Stop countdown timer
+        if (countdownTimer) {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+        }
+
+        // Show pause overlay
+        domPauseOverlay.classList.remove('hidden');
+        AudioManager.play('tick');
+    }
+
+    /**
+     * Resume the game.
+     */
+    function _resume() {
+        state.phase = state.phaseBeforePause || 'selecting';
+        state.phaseBeforePause = null;
+
+        // Hide pause overlay
+        domPauseOverlay.classList.add('hidden');
+        AudioManager.play('tick');
+
+        // Resume countdown if we were selecting
+        if (state.phase === 'selecting') {
+            InputManager.setEnabled(true);
+
+            countdownTimer = setInterval(() => {
+                state.countdown--;
+                domCountdown.textContent = state.countdown;
+                Animations.pulseCountdown();
+                AudioManager.play('tick');
+
+                if (state.countdown <= 0) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                    AudioManager.play('countdown_end');
+                    _onCountdownEnd();
+                }
+            }, 1000);
+        }
+    }
+
+    /**
+     * Check if the game is paused.
+     */
+    function isPaused() {
+        return state.phase === 'paused';
+    }
+
+    /**
      * Called when countdown reaches 0. Handles the reveal phase.
      */
     function _onCountdownEnd() {
@@ -178,6 +278,10 @@ const Game = (() => {
         const dodgerPos = state.selections.dodger;
         const isHit = shooterPos === dodgerPos;
 
+        // Clear previous timeouts
+        revealTimeouts.forEach(t => clearTimeout(t));
+        revealTimeouts = [];
+
         // --- Reveal animation sequence ---
 
         // Step 1: Move entities to positions (0.5s)
@@ -185,12 +289,12 @@ const Game = (() => {
         Animations.moveEntity('dodger', dodgerPos);
 
         // Step 2: Fire water jet (after entities moved)
-        setTimeout(() => {
+        revealTimeouts.push(setTimeout(() => {
             Animations.fireWaterJet(shooterPos);
-        }, 500);
+        }, 500));
 
         // Step 3: Check result (after jet fires)
-        setTimeout(() => {
+        revealTimeouts.push(setTimeout(() => {
             state.phase = 'result';
 
             if (isHit) {
@@ -206,10 +310,10 @@ const Game = (() => {
 
             _updateHUD();
             Animations.showRoundResult(isHit);
-        }, 1100);
+        }, 1100));
 
         // Step 4: Clear and advance (after showing result)
-        setTimeout(() => {
+        revealTimeouts.push(setTimeout(() => {
             Animations.clearWaterJets();
 
             if (state.currentRound >= state.totalRounds) {
@@ -218,7 +322,7 @@ const Game = (() => {
                 state.currentRound++;
                 startRound();
             }
-        }, 3000);
+        }, 3000));
     }
 
     /**
@@ -247,8 +351,11 @@ const Game = (() => {
             clearInterval(countdownTimer);
             countdownTimer = null;
         }
+        revealTimeouts.forEach(t => clearTimeout(t));
+        revealTimeouts = [];
         state.phase = 'idle';
         InputManager.setEnabled(false);
+        domPauseOverlay.classList.add('hidden');
     }
 
     /**
@@ -271,11 +378,14 @@ const Game = (() => {
     return {
         init,
         setTotalRounds,
+        setCustomRoundTime,
         setRoles,
         onGameEnd,
         startGame,
         startRound,
         setSelection,
+        togglePause,
+        isPaused,
         stop,
         getState
     };
