@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Splash Dodge - Un juego local para 2 jugadores. ¡Esquiva el chorro o dispara con precisión!">
+    <title>Splash Dodge 💦</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- ===== SCREEN: MAIN MENU ===== -->
+    <section id="screen-menu" class="screen active">
+        <div class="particles" id="bg-particles"></div>
+        <div class="menu-container">
+            <div class="title-wrapper">
+                <span class="title-emoji">💦</span>
+                <h1 class="game-title">SPLASH<br><span class="title-accent">DODGE</span></h1>
+                <span class="title-emoji">💦</span>
+            </div>
+            <p class="subtitle">Esquiva o dispara. 2 jugadores. 1 teclado.</p>
+            <div class="menu-buttons">
+                <button class="btn btn-primary" id="btn-play">
+                    <span class="btn-icon">🎮</span> JUGAR
+                </button>
+                <button class="btn btn-secondary" id="btn-options">
+                    <span class="btn-icon">⚙️</span> OPCIONES
+                </button>
+                <button class="btn btn-ghost" id="btn-exit">
+                    <span class="btn-icon">🚪</span> SALIR
+                </button>
+            </div>
+        </div>
+        <div class="footer-hint">Versión Alpha 1</div>
+    </section>
+
+    <!-- ===== SCREEN: OPTIONS ===== -->
+    <section id="screen-options" class="screen">
+        <div class="menu-container">
+            <h2 class="screen-title">⚙️ OPCIONES</h2>
+
+            <div class="options-list">
+                <div class="option-row">
+                    <label class="option-label">Número de Rondas</label>
+                    <div class="stepper">
+                        <button class="stepper-btn" id="rounds-minus">−</button>
+                        <span class="stepper-value" id="rounds-value">5</span>
+                        <button class="stepper-btn" id="rounds-plus">+</button>
+                    </div>
+                </div>
+
+                <div class="option-row">
+                    <label class="option-label">Efectos de Sonido</label>
+                    <button class="toggle active" id="sfx-toggle">
+                        <span class="toggle-knob"></span>
+                        <span class="toggle-label">ON</span>
+                    </button>
+                </div>
+
+                <div class="option-row">
+                    <label class="option-label">Efectos Especiales</label>
+                    <button class="toggle active" id="vfx-toggle">
+                        <span class="toggle-knob"></span>
+                        <span class="toggle-label">ON</span>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" id="btn-options-back">
+                <span class="btn-icon">←</span> VOLVER
+            </button>
+        </div>
+    </section>
+
+    <!-- ===== SCREEN: ROLE SELECTION ===== -->
+    <section id="screen-roles" class="screen">
+        <div class="menu-container">
+            <h2 class="screen-title">🎭 SELECCIÓN DE ROLES</h2>
+            <p class="screen-subtitle">Jugador 1, elige tu rol:</p>
+
+            <div class="role-cards">
+                <button class="role-card" id="role-shooter" data-role="shooter">
+                    <div class="role-icon-wrapper shooter-color">
+                        <span class="role-icon">🔫</span>
+                    </div>
+                    <span class="role-name">TORRETA</span>
+                    <span class="role-desc">Dispara el chorro de agua</span>
+                    <span class="role-controls">Controles: A / S / D</span>
+                </button>
+
+                <span class="vs-divider">VS</span>
+
+                <button class="role-card" id="role-dodger" data-role="dodger">
+                    <div class="role-icon-wrapper dodger-color">
+                        <span class="role-icon">🏃</span>
+                    </div>
+                    <span class="role-name">ESQUIVADOR</span>
+                    <span class="role-desc">Evita el chorro de agua</span>
+                    <span class="role-controls">Controles: ← / ↓ / →</span>
+                </button>
+            </div>
+
+            <p class="role-info" id="role-info-text">El Jugador 2 recibirá el rol opuesto.</p>
+
+            <button class="btn btn-ghost" id="btn-roles-back">
+                <span class="btn-icon">←</span> VOLVER
+            </button>
+        </div>
+    </section>
+
+    <!-- ===== SCREEN: GAME ===== -->
+    <section id="screen-game" class="screen">
+        <div id="game-container">
+            <!-- HUD -->
+            <div id="game-hud">
+                <div class="hud-item">
+                    <span class="hud-label">RONDA</span>
+                    <span class="hud-value" id="round-info">1/5</span>
+                </div>
+                <div class="hud-item hud-center">
+                    <div class="countdown-ring">
+                        <span class="countdown-number" id="countdown-display">5</span>
+                    </div>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">PUNTOS</span>
+                    <span class="hud-value" id="score-display">
+                        <span class="score-shooter" id="score-shooter">0</span>
+                        <span class="score-divider">-</span>
+                        <span class="score-dodger" id="score-dodger">0</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Game Arena -->
+            <div id="game-arena">
+                <!-- Turret area -->
+                <div id="turret-area">
+                    <div id="turret" class="game-entity">
+                        <div class="turret-body">
+                            <div class="turret-barrel"></div>
+                        </div>
+                        <span class="entity-label shooter-text">TORRETA</span>
+                    </div>
+                </div>
+
+                <!-- Lanes -->
+                <div id="lanes-area">
+                    <div class="lane" data-pos="0">
+                        <div class="lane-marker">IZQ</div>
+                        <div class="water-jet" id="jet-0"></div>
+                    </div>
+                    <div class="lane" data-pos="1">
+                        <div class="lane-marker">CEN</div>
+                        <div class="water-jet" id="jet-1"></div>
+                    </div>
+                    <div class="lane" data-pos="2">
+                        <div class="lane-marker">DER</div>
+                        <div class="water-jet" id="jet-2"></div>
+                    </div>
+                </div>
+
+                <!-- Dodger area -->
+                <div id="dodger-area">
+                    <div id="dodger" class="game-entity">
+                        <div class="dodger-body">
+                            <div class="dodger-head"></div>
+                            <div class="dodger-torso"></div>
+                        </div>
+                        <span class="entity-label dodger-text">ESQUIVADOR</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Selection Indicators -->
+            <div id="selection-indicators">
+                <div class="indicator shooter-indicator">
+                    <span class="indicator-dot"></span>
+                    <span class="indicator-label">Torreta:</span>
+                    <span class="indicator-status" id="shooter-status">Esperando...</span>
+                </div>
+                <div class="indicator dodger-indicator">
+                    <span class="indicator-dot"></span>
+                    <span class="indicator-label">Esquivador:</span>
+                    <span class="indicator-status" id="dodger-status">Esperando...</span>
+                </div>
+            </div>
+
+            <!-- Controls Reminder -->
+            <div id="controls-reminder">
+                <span class="control-hint shooter-text">🔴 Torreta: A / S / D</span>
+                <span class="control-hint dodger-text">🟢 Esquivador: ← / ↓ / →</span>
+            </div>
+
+            <!-- Round Result Overlay -->
+            <div id="round-result" class="round-result hidden">
+                <span class="result-icon" id="result-icon">💥</span>
+                <span class="result-text" id="result-text">¡IMPACTO!</span>
+            </div>
+        </div>
+
+        <!-- VFX overlays -->
+        <div id="vfx-dodge-overlay"></div>
+        <div id="vfx-hit-overlay"></div>
+    </section>
+
+    <!-- ===== SCREEN: RESULTS ===== -->
+    <section id="screen-results" class="screen">
+        <div class="menu-container">
+            <div class="result-crown" id="result-crown">👑</div>
+            <h2 class="screen-title" id="result-title">¡VICTORIA!</h2>
+            <p class="result-winner" id="result-winner-text">El esquivador gana</p>
+
+            <div class="result-scoreboard">
+                <div class="result-score-card shooter-border">
+                    <span class="result-role">🔫 Torreta</span>
+                    <span class="result-score" id="final-shooter-score">0</span>
+                </div>
+                <div class="result-score-card dodger-border">
+                    <span class="result-role">🏃 Esquivador</span>
+                    <span class="result-score" id="final-dodger-score">0</span>
+                </div>
+            </div>
+
+            <div class="result-buttons">
+                <button class="btn btn-primary" id="btn-play-again">
+                    <span class="btn-icon">🔄</span> JUGAR DE NUEVO
+                </button>
+                <button class="btn btn-ghost" id="btn-back-menu">
+                    <span class="btn-icon">🏠</span> MENÚ PRINCIPAL
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="js/audio.js"></script>
+    <script src="js/animations.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
