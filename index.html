@@ -119,16 +119,16 @@
     <!-- ===== SCREEN: ROLE SELECTION ===== -->
     <section id="screen-roles" class="screen">
         <div class="menu-container role-select-container">
-            <h2 class="screen-title">🎭 SELECCIÓN DE ROLES</h2>
+            <h2 class="screen-title">SELECCIÓN DE ROLES</h2>
             <p class="screen-subtitle">Usa tus controles para moverte al rol que quieras</p>
 
             <div class="role-arena">
                 <!-- Left panel: Torreta -->
                 <div class="role-panel" id="panel-shooter">
                     <div class="role-panel-header">
-                        <span class="role-panel-icon">🔫</span>
                         <span class="role-panel-name">TORRETA</span>
                     </div>
+                    <img src="assets/bomb-icon.png" alt="" class="role-panel-bg-icon">
                     <div class="role-panel-players" id="slot-shooter"></div>
                 </div>
 
@@ -136,12 +136,16 @@
                 <div class="role-panel role-panel-center" id="panel-center">
                     <div class="role-panel-players" id="slot-center">
                         <div class="player-token" id="p1-token">
-                            <div class="player-token-icon p1-glow">🧑</div>
-                            <span class="player-token-label">J1</span>
+                            <div class="player-token-icon p1-glow">
+                                <img src="assets/user-icon.png" alt="P1" class="player-icon-img">
+                            </div>
+                            <span class="player-token-label">P1</span>
                         </div>
                         <div class="player-token" id="p2-token">
-                            <div class="player-token-icon p2-glow">🧑</div>
-                            <span class="player-token-label">J2</span>
+                            <div class="player-token-icon p2-glow">
+                                <img src="assets/user-icon.png" alt="P2" class="player-icon-img">
+                            </div>
+                            <span class="player-token-label">P2</span>
                         </div>
                     </div>
                 </div>
@@ -149,21 +153,19 @@
                 <!-- Right panel: Esquivador -->
                 <div class="role-panel" id="panel-dodger">
                     <div class="role-panel-header">
-                        <span class="role-panel-icon">🏃</span>
                         <span class="role-panel-name">ESQUIVADOR</span>
                     </div>
+                    <img src="assets/shield-icon.png" alt="" class="role-panel-bg-icon">
                     <div class="role-panel-players" id="slot-dodger"></div>
                 </div>
             </div>
 
             <div class="role-controls-hint">
-                <span class="p1-hint">J1: <kbd>A</kbd> ← → <kbd>D</kbd></span>
-                <span class="p2-hint">J2: <kbd>←</kbd> ← → <kbd>→</kbd></span>
+                <span class="p1-hint">P1: <kbd>A</kbd> ← → <kbd>D</kbd></span>
+                <span class="p2-hint">P2: <kbd>←</kbd> ← → <kbd>→</kbd></span>
             </div>
 
-            <button class="btn btn-primary btn-ready hidden" id="btn-ready">
-                <span class="btn-icon">✅</span> ¡LISTO!
-            </button>
+            <button class="btn btn-primary btn-ready hidden" id="btn-ready">¡LISTO!</button>
 
             <button class="btn btn-ghost" id="btn-roles-back">
                 <span class="btn-icon">←</span> VOLVER

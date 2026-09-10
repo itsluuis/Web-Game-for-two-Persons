@@ -147,7 +147,7 @@
         fill.style.transition = 'none';
         fill.style.width = '0%';
 
-        const TOTAL_DURATION = 7000; // 7 seconds
+        const TOTAL_DURATION = 5000; // 5 seconds
         let startTime = null;
 
         // Custom easing: fast start, normal mid, stall at 75%, rush to 100%

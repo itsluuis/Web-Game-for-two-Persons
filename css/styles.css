@@ -534,6 +534,8 @@ kbd {
     transition: all var(--transition-normal);
     gap: var(--space-sm);
     min-height: 160px;
+    position: relative;
+    overflow: hidden;
 }
 
 .role-panel-center {
@@ -546,14 +548,27 @@ kbd {
     background: rgba(139, 92, 246, 0.05);
 }
 
+.role-panel-bg-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+    opacity: 0.35;
+    filter: brightness(0) invert(1);
+    z-index: 0;
+    pointer-events: none;
+}
+
 .role-panel-header {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 4px;
+    z-index: 1;
 }
-
-.role-panel-icon { font-size: 2rem; }
 
 .role-panel-name {
     font-family: var(--font-display);
@@ -570,6 +585,8 @@ kbd {
     align-items: center;
     flex: 1;
     min-height: 70px;
+    z-index: 1;
+    position: relative;
 }
 
 /* Player Tokens */
@@ -607,14 +624,14 @@ kbd {
 .role-controls-hint {
     display: flex;
     justify-content: space-between;
-    width: 100%;
-    padding: var(--space-sm) var(--space-md);
+    width: 35%;
+    padding: var(--space-xs) var(--space-sm);
     background: rgba(255, 255, 255, 0.02);
     border-radius: var(--radius-sm);
 }
 
-.p1-hint { color: var(--accent-p1); font-weight: 600; font-size: 0.8rem; }
-.p2-hint { color: var(--accent-p2); font-weight: 600; font-size: 0.8rem; }
+.p1-hint { color: var(--accent-p1); font-weight: 600; font-size: 0.7rem; }
+.p2-hint { color: var(--accent-p2); font-weight: 600; font-size: 0.7rem; }
 
 .btn-ready {
     width: 100%;
