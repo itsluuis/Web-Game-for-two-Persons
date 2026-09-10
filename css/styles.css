@@ -6,9 +6,9 @@
 /* --- Design Tokens --- */
 :root {
     /* Colors */
-    --bg-primary: #070714;
-    --bg-secondary: #0f0a24;
-    --bg-gradient: linear-gradient(135deg, #070714 0%, #0f0a24 40%, #160d30 100%);
+    --bg-primary: #131936;
+    --bg-secondary: #131936;
+    --bg-gradient: #131936;
 
     --glass-bg: rgba(255, 255, 255, 0.04);
     --glass-bg-hover: rgba(255, 255, 255, 0.08);
@@ -133,10 +133,10 @@ kbd {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2xl);
+    gap: 4rem;
     padding: var(--space-2xl);
     width: 90%;
-    max-width: 800px;
+    max-width: 1100px;
     animation: fadeInUp 0.6s ease-out;
 }
 
@@ -144,6 +144,7 @@ kbd {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+    flex-shrink: 0;
 }
 
 .menu-right {
@@ -151,38 +152,25 @@ kbd {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    flex: 1;
+    padding-right: 2rem;
 }
 
 .game-title {
     font-family: var(--font-display);
     font-weight: 900;
-    font-size: 5rem;
+    font-size: 7rem;
     line-height: 0.95;
     letter-spacing: -0.02em;
-    text-shadow: 0 0 60px var(--accent-purple-glow);
-    color: var(--text-primary);
-}
-
-.title-accent {
-    background: linear-gradient(135deg, var(--accent-water), var(--accent-shooter));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin-top: var(--space-sm);
-    font-weight: 400;
+    color: #98a8d9;
 }
 
 /* --- Menu Buttons --- */
 .menu-buttons {
     display: flex;
     flex-direction: column;
-    gap: var(--space-sm);
-    width: 220px;
+    gap: var(--space-md);
+    width: 340px;
 }
 
 /* --- Buttons --- */
@@ -217,14 +205,21 @@ kbd {
 .btn:active { transform: scale(0.97); }
 .btn-icon { font-size: 1.2rem; }
 
+/* Menu-specific large buttons */
+.menu-buttons .btn {
+    font-size: 1.6rem;
+    padding: var(--space-lg) var(--space-xl);
+    letter-spacing: 0.08em;
+}
+
 .btn-primary {
-    background: linear-gradient(135deg, var(--accent-purple), hsl(290, 100%, 55%));
-    color: white;
-    box-shadow: 0 4px 20px var(--accent-purple-glow);
+    background: #E7E7E0;
+    color: #1a1a2e;
+    box-shadow: none;
 }
 
 .btn-primary:hover {
-    box-shadow: 0 6px 30px var(--accent-purple-glow);
+    background: #d4d4cc;
     transform: translateY(-2px);
 }
 
@@ -451,6 +446,13 @@ kbd {
     border-radius: var(--radius-full);
 }
 
+.player-icon-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    filter: brightness(0) invert(1) opacity(0.85);
+}
+
 .p1-glow {
     background: rgba(59, 130, 246, 0.15);
     border: 2px solid rgba(59, 130, 246, 0.3);
@@ -503,13 +505,7 @@ kbd {
     width: 0%;
     background: linear-gradient(90deg, var(--accent-purple), var(--accent-cyan));
     border-radius: var(--radius-full);
-    transition: width 0.3s ease;
-}
-
-.loading-text {
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    font-weight: 500;
+    transition: width 0.1s linear;
 }
 
 /* ========================================
@@ -1171,7 +1167,7 @@ kbd {
     .menu-left { align-items: center; }
     .menu-right { align-items: center; text-align: center; }
 
-    .game-title { font-size: 3.5rem; }
+    .game-title { font-size: 4.5rem; }
 
     .menu-container { padding: var(--space-xl) var(--space-lg); }
 

@@ -40,41 +40,7 @@
         currentScreen = screenName;
     }
 
-    // --- Particles Background ---
-    function initParticles() {
-        const container = document.getElementById('bg-particles');
-        if (!container) return;
 
-        for (let i = 0; i < 40; i++) {
-            const particle = document.createElement('div');
-            particle.style.cssText = `
-                position: absolute;
-                width: ${2 + Math.random() * 4}px;
-                height: ${2 + Math.random() * 4}px;
-                background: hsla(${200 + Math.random() * 80}, 80%, 70%, ${0.1 + Math.random() * 0.2});
-                border-radius: 50%;
-                left: ${Math.random() * 100}%;
-                top: ${Math.random() * 100}%;
-                animation: particleFloat ${8 + Math.random() * 12}s ease-in-out infinite;
-                animation-delay: ${Math.random() * -20}s;
-            `;
-            container.appendChild(particle);
-        }
-
-        if (!document.getElementById('particle-styles')) {
-            const style = document.createElement('style');
-            style.id = 'particle-styles';
-            style.textContent = `
-                @keyframes particleFloat {
-                    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-                    25% { transform: translate(20px, -30px) scale(1.2); opacity: 0.6; }
-                    50% { transform: translate(-15px, -60px) scale(0.8); opacity: 0.4; }
-                    75% { transform: translate(25px, -20px) scale(1.1); opacity: 0.5; }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-    }
 
     // ==========================================
     // MAIN MENU
@@ -90,11 +56,6 @@
             AudioManager.init();
             AudioManager.play('tick');
             showScreen('options');
-        });
-
-        document.getElementById('btn-exit').addEventListener('click', () => {
-            window.close();
-            alert('¡Gracias por jugar Acuasplas! 💦\nPuedes cerrar esta pestaña.');
         });
     }
 
@@ -182,29 +143,51 @@
     function startLoadingScreen() {
         showScreen('loading');
         const fill = document.getElementById('loading-bar-fill');
-        const text = document.getElementById('loading-text');
 
+        fill.style.transition = 'none';
         fill.style.width = '0%';
-        text.textContent = 'Preparando arena...';
 
-        const steps = [
-            { time: 400, width: '25%', label: 'Cargando controles...' },
-            { time: 900, width: '50%', label: 'Preparando torreta...' },
-            { time: 1400, width: '75%', label: 'Calibrando chorro...' },
-            { time: 2000, width: '100%', label: '¡Listo!' }
-        ];
+        const TOTAL_DURATION = 7000; // 7 seconds
+        let startTime = null;
 
-        steps.forEach(step => {
-            setTimeout(() => {
-                fill.style.width = step.width;
-                text.textContent = step.label;
-            }, step.time);
-        });
+        // Custom easing: fast start, normal mid, stall at 75%, rush to 100%
+        function customEasing(t) {
+            if (t < 0.2) {
+                // Fast start: 0-20% time → 0-40% progress
+                return (t / 0.2) * 0.4;
+            } else if (t < 0.5) {
+                // Normal speed: 20-50% time → 40-70% progress
+                return 0.4 + ((t - 0.2) / 0.3) * 0.3;
+            } else if (t < 0.85) {
+                // Stall at 75%: 50-85% time → 70-76% progress
+                return 0.7 + ((t - 0.5) / 0.35) * 0.06;
+            } else {
+                // Rush to finish: 85-100% time → 76-100% progress
+                const localT = (t - 0.85) / 0.15;
+                const eased = localT * localT; // ease-in for dramatic effect
+                return 0.76 + eased * 0.24;
+            }
+        }
 
-        // After loading, go to role selection
-        setTimeout(() => {
-            openRoleSelection();
-        }, 2600);
+        function animate(timestamp) {
+            if (!startTime) startTime = timestamp;
+            const elapsed = timestamp - startTime;
+            const t = Math.min(elapsed / TOTAL_DURATION, 1);
+            const progress = customEasing(t) * 100;
+
+            fill.style.width = progress + '%';
+
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                fill.style.width = '100%';
+                setTimeout(() => {
+                    openRoleSelection();
+                }, 400);
+            }
+        }
+
+        requestAnimationFrame(animate);
     }
 
     // ==========================================
@@ -434,8 +417,7 @@
         setupResults();
         setupPause();
 
-        // Background effects
-        initParticles();
+
 
         // Show menu
         showScreen('menu');

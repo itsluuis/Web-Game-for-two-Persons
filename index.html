@@ -14,24 +14,15 @@
 
     <!-- ===== SCREEN: MAIN MENU ===== -->
     <section id="screen-menu" class="screen active">
-        <div class="particles" id="bg-particles"></div>
         <div class="menu-layout">
             <div class="menu-left">
                 <div class="menu-buttons">
-                    <button class="btn btn-primary" id="btn-play">
-                        <span class="btn-icon">🎮</span> JUGAR
-                    </button>
-                    <button class="btn btn-secondary" id="btn-options">
-                        <span class="btn-icon">⚙️</span> OPCIONES
-                    </button>
-                    <button class="btn btn-ghost" id="btn-exit">
-                        <span class="btn-icon">🚪</span> SALIR
-                    </button>
+                    <button class="btn btn-primary" id="btn-play">JUGAR</button>
+                    <button class="btn btn-secondary" id="btn-options">OPCIONES</button>
                 </div>
             </div>
             <div class="menu-right">
-                <h1 class="game-title">ACUA<span class="title-accent">SPLAS</span></h1>
-                <p class="subtitle">💦 2 jugadores · 1 teclado 💦</p>
+                <h1 class="game-title">AcuaSplash</h1>
             </div>
         </div>
         <div class="footer-hint">Versión Alpha 1</div>
@@ -95,8 +86,10 @@
 
             <div class="loading-players">
                 <div class="loading-player">
-                    <div class="loading-player-icon p1-glow">🧑</div>
-                    <span class="loading-player-name">JUGADOR 1</span>
+                    <div class="loading-player-icon p1-glow">
+                        <img src="assets/user-icon.png" alt="P1" class="player-icon-img">
+                    </div>
+                    <span class="loading-player-name">P1</span>
                     <div class="loading-keys">
                         <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>
                     </div>
@@ -105,8 +98,10 @@
                 <span class="loading-vs">VS</span>
 
                 <div class="loading-player">
-                    <div class="loading-player-icon p2-glow">🧑</div>
-                    <span class="loading-player-name">JUGADOR 2</span>
+                    <div class="loading-player-icon p2-glow">
+                        <img src="assets/user-icon.png" alt="P2" class="player-icon-img">
+                    </div>
+                    <span class="loading-player-name">P2</span>
                     <div class="loading-keys">
                         <kbd>←</kbd> <kbd>↓</kbd> <kbd>→</kbd>
                     </div>
@@ -117,7 +112,6 @@
                 <div class="loading-bar">
                     <div class="loading-bar-fill" id="loading-bar-fill"></div>
                 </div>
-                <span class="loading-text" id="loading-text">Cargando...</span>
             </div>
         </div>
     </section>
