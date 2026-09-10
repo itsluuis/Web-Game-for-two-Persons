@@ -527,7 +527,7 @@ kbd {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: var(--space-lg) var(--space-sm);
+    padding: var(--space-xs) var(--space-sm) var(--space-lg);
     background: rgba(255, 255, 255, 0.025);
     border: 2px solid rgba(255, 255, 255, 0.06);
     border-radius: var(--radius-lg);
@@ -623,11 +623,13 @@ kbd {
 
 .role-controls-hint {
     display: flex;
-    justify-content: space-between;
-    width: 35%;
-    padding: var(--space-xs) var(--space-sm);
+    justify-content: center;
+    gap: var(--space-xl);
+    width: auto;
+    padding: var(--space-xs) var(--space-lg);
     background: rgba(255, 255, 255, 0.02);
     border-radius: var(--radius-sm);
+    white-space: nowrap;
 }
 
 .p1-hint { color: var(--accent-p1); font-weight: 600; font-size: 0.7rem; }
